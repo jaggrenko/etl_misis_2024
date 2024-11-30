@@ -1,0 +1,109 @@
+version: '3.7'
+
+services:
+  mongodb:
+    image: mongo:latest
+    labels:
+      NAME: "my_mongo"
+    restart: on-failure
+    env_file:
+      - db/mongo/env/.mongo.env
+    networks:
+      - MyMongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodb-data:/data/db
+      - mongodb-log:/var/log/mongodb
+
+  mongo-express:
+    image: mongo-express:latest
+    env_file:
+      - db/mongo/env/.mongo_express.env
+    networks:
+      - MyMongo
+    ports:
+      - "0.0.0.0:8081:8081"
+    depends_on:
+      - mongodb
+
+  postgres:
+    image: postgres:17-alpine
+    labels:
+      NAME: "my_postgres"
+    restart: always
+    env_file:
+      - db/postgres/env/.postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - pg-conf:/etc/postgresql
+      - pg-log:/var/log/postgresql
+
+  redis:
+    image: redis:latest
+    labels:
+      NAME: "my_redis"
+    restart: always
+    ports:
+      - "6379:6379"
+
+  influxdb2:
+    image: influxdb:2-alpine
+    labels:
+      NAME: "my_influxdb"
+    restart: always
+    env_file:
+      - db/influxdb/env/.influx.env
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb2-data:/var/lib/influxdb2
+      - influxdb2-config:/etc/influxdb2
+
+  clickhouse:
+    image: bitnami/clickhouse:latest
+    labels:
+      NAME: "my_clickhouse"
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - CLICKHOUSE_ADMIN_USER=ch
+      - CLICKHOUSE_ADMIN_PASSWORD=ch
+      - CLICKHOUSE_HTTP_PORT=8123
+      - CLICKHOUSE_TCP_PORT=9000
+      - CLICKHOUSE_POSTGRESQL_PORT=9005
+    ports:
+      - "8123:8123"
+    volumes:
+      - clickhouse_volume_dir:/var/lib/clickhouse
+      - clickhouse_conf_dir:/etc/clickhouse
+      - clickhouse_log_file:/var/log/clickhouse
+
+networks:
+  MyMongo:
+    name: MyMongo
+
+volumes:
+  mongodb-data:
+    driver: local
+  mongodb-log:
+    driver: local
+  pg-data:
+    driver: local
+  pg-conf:
+    driver: local
+  pg-log:
+    driver: local
+  influxdb2-data:
+    driver: local
+  influxdb2-config:
+    driver: local
+  clickhouse_volume_dir:
+    driver: local
+  clickhouse_conf_dir:
+    driver: local
+  clickhouse_log_file:
+    driver: local
