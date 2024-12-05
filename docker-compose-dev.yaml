@@ -6,7 +6,7 @@ services:
     image: postgres:17-alpine
     restart: always
     env_file:
-      - db/postgres/env/.postgres.env
+      - db/postgres/.postgres.env
     ports:
       - "5432:5432"
     volumes:
@@ -14,10 +14,82 @@ services:
       - pg-conf:/etc/postgresql
       - pg-log:/var/log/postgresql
 
+  mongodb:
+    image: mongo:latest
+    container_name: "target_mongo"
+    restart: always
+    env_file:
+      - db/mongo/.mongo.env
+    networks:
+      - mongo_nw
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodb-data:/data/db
+      - mongodb-log:/var/log/mongodb
+
+  mongo-express:
+    image: mongo-express:latest
+    env_file:
+      - ./db/mongo/.mongo_express.env
+    networks:
+      - mongo_nw
+    ports:
+      - "0.0.0.0:8081:8081"
+    depends_on:
+      - mongodb
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest-alpine
+    container_name: "target_ch"
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - CLICKHOUSE_HTTP_PORT=8123
+      - CLICKHOUSE_TCP_PORT=9000
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ch_volume_dir:/var/lib/clickhouse
+      - ch_conf_dir:/etc/clickhouse
+      - ch_log_file:/var/log/clickhouse
+
+  influxdb2:
+    image: influxdb:2-alpine
+    container_name: "target_influx"
+    restart: always
+    env_file:
+      - ./db/influxdb2/.influxdb.env
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb2-data:/var/lib/influxdb2
+      - influxdb2-config:/etc/influxdb2
+
+networks:
+  mongo_nw:
+    name: mongo_nw
+
 volumes:
   pg-data:
     driver: local
   pg-conf:
     driver: local
   pg-log:
+    driver: local
+  mongodb-data:
+    driver: local
+  mongodb-log:
+    driver: local
+  ch_volume_dir:
+    driver: local
+  ch_conf_dir:
+    driver: local
+  ch_log_file:
+    driver: local
+  influxdb2-data:
+    driver: local
+  influxdb2-config:
     driver: local

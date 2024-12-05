@@ -12,3 +12,6 @@ al-mm:
 
 al-uh:
 	alembic upgrade heads
+
+venv-up:
+	source venv/bin/activate
