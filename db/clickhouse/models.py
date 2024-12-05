@@ -22,11 +22,3 @@ class DescriptionGraduatesUniversity(Base):
     __table_args__ = (
         engines.CollapsingMergeTree(id, partition_by=func.toYYYYMM(year), order_by=(year, average_salary)),
     )
-
-
-class DD(Base):
-    id = Column(types.Int8, primary_key=True)
-    year = Column(types.Date, nullable=False)
-    average_salary = Column(types.Float, nullable=True)
-    percent_employed = Column(types.Float, nullable=False)
-    grouping = Column(types.Int32, nullable=False)

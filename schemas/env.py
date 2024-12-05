@@ -8,11 +8,11 @@ from alembic.ddl.impl import DefaultImpl
 from clickhouse_sqlalchemy.alembic.dialect import patch_alembic_version, include_object
 
 from db.postgres.models import Base as PgBase
-from db.clickhouse.models import Base as ChBase, metadata
+from db.clickhouse.models import metadata
 
 TARGET_METADATA = {
     "postgres": PgBase.metadata,
-    "clickhouse": ChBase,
+    "clickhouse": metadata,
 }
 
 # this is the Alembic Config object, which provides
