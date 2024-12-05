@@ -7,8 +7,13 @@ from alembic import context
 from alembic.ddl.impl import DefaultImpl
 from clickhouse_sqlalchemy.alembic.dialect import patch_alembic_version, include_object
 
-#from db.postgres.models import Base
-from db.clickhouse.models import Base, metadata
+from db.postgres.models import Base as PgBase
+from db.clickhouse.models import Base as ChBase, metadata
+
+TARGET_METADATA = {
+    "postgres": PgBase.metadata,
+    "clickhouse": ChBase,
+}
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -19,10 +24,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
-target_metadata = Base.metadata
+target_metadata = TARGET_METADATA.get(context.config.config_ini_section, None)
 # target_metadata = metadata
 
 # other values from the config, defined by the needs of env.py,
