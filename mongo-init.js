@@ -1,6 +1,6 @@
-db.createCollection('sales_aggregated_data');
+db.createCollection('data_graduates');
 
-db.sales_aggregated_data.insertOne(
+db.data_graduates.insertOne(
     {
         name: "Grace of Docker"
     }

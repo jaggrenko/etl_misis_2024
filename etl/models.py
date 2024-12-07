@@ -1,9 +1,9 @@
-from typing import Optional
-from pydantic import BaseModel
+from typing import Any, Optional
+from pydantic import AliasPath, BaseModel, Field
 
 
 class DescriptionGraduatesUniversity(BaseModel):
-    id: int
+    id: Any
     object_level: str
     object_name: str
     gender: str
