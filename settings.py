@@ -40,3 +40,7 @@ class SettingsMongo(BaseSettings):
             f"@{self.MONGO_INITDB_ROOT_HOST}:{self.MONGO_INITDB_ROOT_PORT}")
 
     model_config = SettingsConfigDict(env_file="db/mongo/.mongo.env")
+
+
+class SettingsRuntime(BaseSettings):
+    BATCH_SIZE: int = 5_000

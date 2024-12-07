@@ -125,15 +125,15 @@ class MongoAsyncDAO(AbstractDAO):
         pass
 
     @classmethod
-    async def insert_one(cls, record: dict) -> ObjectID:
+    async def insert_one(cls, data: dict) -> ObjectID:
         db = mongo_async_client[cls.database]
         collection = db[cls.collection]
 
-        return await collection.insert_one(record)
+        return await collection.insert_one(data)
 
     @classmethod
-    async def insert_many(cls, records: Iterable[dict]):
+    async def insert_many(cls, data: Iterable[dict]) -> list[ObjectID]:
         db = mongo_async_client[cls.database]
         collection = db[cls.collection]
 
-        return await collection.insert_many(records)
+        return await collection.insert_many(data, ordered=False)
