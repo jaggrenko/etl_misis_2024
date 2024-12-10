@@ -9,7 +9,7 @@ class BaseModel(Base):
     id = Column(Integer, primary_key=True)
 
 
-class DataGraduates(BaseModel):
+class DescriptionGraduatesUniversity(BaseModel):
     __tablename__ = 'data_graduates'
 
     object_level = Column(String(6))

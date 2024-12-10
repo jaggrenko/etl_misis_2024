@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import AsyncGenerator, Iterable, TypeVar  # TODO: Mapping?
+from typing import AsyncGenerator, Iterable, NoReturn, TypeVar
 
 from sqlalchemy import select
 
-from connectors import mongo_async_client
-from db.sessions import mongo_sync_session_maker, pg_async_session_maker
+from connectors import influx_async_client, mongo_async_client
+from db.sessions import ch_async_session_maker, mongo_sync_session_maker, pg_async_session_maker
 
 BATCH_SIZE = 10_000
 METHOD_NOT_IMPLEMENTED = "This abstract method must be implemented."
@@ -137,3 +137,55 @@ class MongoAsyncDAO(AbstractDAO):
         collection = db[cls.collection]
 
         return await collection.insert_many(data, ordered=False)
+
+
+class InfluxAsyncDAO(AbstractDAO):
+    bucket: str = None
+
+    @classmethod
+    async def fetch_one(cls, **filter_by):
+        pass
+
+    @classmethod
+    async def fetch_all(cls, *args, **kwargs):
+        pass
+
+    @classmethod
+    async def fetch_all_batch(cls, *args, **kwargs):
+        pass
+
+    @classmethod
+    async def insert_one(cls, data: dict) -> bool:
+        async with influx_async_client() as client:
+            return await client.write_api().write(bucket=cls.bucket, record=data)
+
+    @classmethod
+    async def insert_many(cls, data: list[dict]) -> bool:
+        async with influx_async_client() as client:
+            return await client.write_api().write(bucket=cls.bucket, record=data)
+
+
+class ClickhouseAsyncDAO(AbstractDAO):
+    model = None
+
+    @classmethod
+    async def fetch_one(cls, *args, **kwargs):
+        pass
+
+    @classmethod
+    async def fetch_all(cls,*args, **kwargs):
+        pass
+
+    @classmethod
+    async def fetch_all_batch(cls, *args, **kwargs):
+        pass
+
+    @classmethod
+    async def insert_one(cls, data: dict) -> NoReturn:
+        async with ch_async_session_maker() as session:
+            await session.execute(cls.model.__table__.insert(), data)
+
+    @classmethod
+    async def insert_many(cls, data: list[dict]) -> NoReturn:
+        async with ch_async_session_maker() as session:
+            await session.execute(cls.model.__table__.insert(), data)
